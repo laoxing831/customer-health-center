@@ -323,9 +323,13 @@ const updateChart = () => {
       left: 'center'
     },
     tooltip: {
-      trigger: 'axis',
-      show: true,
-      confine: true
+      trigger: 'item',
+      backgroundColor: 'rgba(50, 50, 50, 0.9)',
+      borderColor: '#666',
+      textStyle: {
+        color: '#fff'
+      },
+      formatter: '{b}<br/>{a}: {c} ' + unit
     },
     xAxis: {
       type: 'category',
