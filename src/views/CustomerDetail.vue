@@ -54,13 +54,26 @@
           style="width: 300px"
           @change="updateChart"
         />
-        <el-select v-model="dataType" placeholder="选择数据类型" style="width: 150px; margin-left: 10px">
-          <el-option label="工单数" value="工单量" />
-          <el-option label="退换操作量" value="退换操作量" />
-          <el-option label="物流拦截量" value="物流拦截量" />
-          <el-option label="打款数" value="打款数" />
-          <el-option label="知识创建量" value="知识创建量" />
-          <el-option label="知识使用量" value="知识使用量" />
+        <el-select v-model="dataType" placeholder="选择数据类型" style="width: 180px; margin-left: 10px">
+          <el-option label="工单总量" value="工单总量" />
+          <el-option label="人工工单量" value="人工工单量" />
+          <el-option label="系统工单量" value="系统工单量" />
+          <el-option label="消费者工单量" value="消费者工单量" />
+          <el-option label="退款操作总量" value="退款操作总量" />
+          <el-option label="人工退款操作量" value="人工退款操作量" />
+          <el-option label="系统退款操作量" value="系统退款操作量" />
+          <el-option label="订单备注总量" value="订单备注总量" />
+          <el-option label="人工备注量" value="人工备注量" />
+          <el-option label="系统备注量" value="系统备注量" />
+          <el-option label="物流拦截总量" value="物流拦截总量" />
+          <el-option label="自动拦截退款量" value="自动拦截退款量" />
+          <el-option label="已退款自动拦截量" value="已退款自动拦截量" />
+          <el-option label="人工拦截量" value="人工拦截量" />
+          <el-option label="物流异常总量" value="物流异常总量" />
+          <el-option label="发货异常总量" value="发货异常总量" />
+          <el-option label="打款总量" value="打款总量" />
+          <el-option label="知识创建总量" value="知识创建总量" />
+          <el-option label="知识使用总量" value="知识使用总量" />
           <el-option label="智动启动量" value="智动启动量" />
         </el-select>
         <el-button type="primary" @click="updateChart">更新图表</el-button>
@@ -82,15 +95,26 @@
         <h3>明细数据</h3>
         <el-table :data="sortedDailyData" style="width: 100%" border>
           <el-table-column prop="date" label="日期" width="120" />
-          <el-table-column prop="items.工单量" label="工单数" width="100" />
-          <el-table-column prop="items.退换操作量" label="退换操作量" width="120" />
-          <el-table-column prop="items.物流拦截量" label="物流拦截量" width="120" />
-          <el-table-column prop="items.物流异常是否启动" label="物流异常" width="120" />
-          <el-table-column prop="items.发货异常是否启动" label="发货异常" width="120" />
-          <el-table-column prop="items.打款数" label="打款数" width="100" />
-          <el-table-column prop="items.知识创建量" label="知识创建量" width="120" />
-          <el-table-column prop="items.知识使用量" label="知识使用量" width="120" />
-          <el-table-column prop="items.智动启动量" label="智动启动量" width="120" />
+          <el-table-column prop="items.工单总量" label="工单总量" width="100" />
+          <el-table-column prop="items.人工工单量" label="人工工单量" width="100" />
+          <el-table-column prop="items.系统工单量" label="系统工单量" width="100" />
+          <el-table-column prop="items.消费者工单量" label="消费者工单量" width="110" />
+          <el-table-column prop="items.退款操作总量" label="退款操作总量" width="110" />
+          <el-table-column prop="items.人工退款操作量" label="人工退款操作量" width="120" />
+          <el-table-column prop="items.系统退款操作量" label="系统退款操作量" width="120" />
+          <el-table-column prop="items.订单备注总量" label="订单备注总量" width="110" />
+          <el-table-column prop="items.人工备注量" label="人工备注量" width="100" />
+          <el-table-column prop="items.系统备注量" label="系统备注量" width="100" />
+          <el-table-column prop="items.物流拦截总量" label="物流拦截总量" width="110" />
+          <el-table-column prop="items.自动拦截退款量" label="自动拦截退款量" width="120" />
+          <el-table-column prop="items.已退款自动拦截量" label="已退款自动拦截量" width="130" />
+          <el-table-column prop="items.人工拦截量" label="人工拦截量" width="100" />
+          <el-table-column prop="items.物流异常总量" label="物流异常总量" width="110" />
+          <el-table-column prop="items.发货异常总量" label="发货异常总量" width="110" />
+          <el-table-column prop="items.打款总量" label="打款总量" width="100" />
+          <el-table-column prop="items.知识创建总量" label="知识创建总量" width="110" />
+          <el-table-column prop="items.知识使用总量" label="知识使用总量" width="110" />
+          <el-table-column prop="items.智动启动量" label="智动启动量" width="100" />
           <el-table-column label="操作" width="80" fixed="right">
             <template #default="scope">
               <el-button type="danger" size="small" @click="deleteDailyData(scope.$index)">
@@ -153,7 +177,7 @@ const loading = ref(false)
 const chartType = ref('line')
 const timeRange = ref('7d')
 const dateRange = ref([])
-const dataType = ref('工单量')
+const dataType = ref('工单总量')
 
 const customer = ref(null)
 
@@ -279,7 +303,7 @@ const deleteDailyData = async (index) => {
       .update({
         daily_data: newDailyData,
         health_status: calculatedStatus,
-        has_order: newDailyData.some(d => (d.items['工单量'] || 0) > 0)
+        has_order: newDailyData.some(d => (d.items['工单总量'] || 0) > 0)
       })
       .eq('id', customer.value.id)
     
@@ -315,7 +339,7 @@ const updateChart = () => {
   const values = displayData.map(item => item.items[dataType.value] || 0)
 
   const currentDataType = dataType.value
-  const unit = currentDataType === '工单量' ? '单' : '次'
+  const unit = currentDataType.includes('工单') || currentDataType.includes('备注') ? '单' : '次'
   
   chart.value.setOption({
     title: {

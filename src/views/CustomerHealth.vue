@@ -321,13 +321,13 @@
         <el-divider>每日数据（选填）</el-divider>
         <div style="margin-bottom: 15px; color: #909399; font-size: 12px;">
           每行一条数据，字段用空格或逗号分隔：<br>
-          字段顺序：日期 工单量 退换操作量 物流拦截量 打款数 知识创建量 知识使用量
+          字段顺序：日期 工单总量 人工工单量 系统工单量 消费者工单量 退款操作总量 人工退款操作量 系统退款操作量 订单备注总量 人工备注量 系统备注量 物流拦截总量 自动拦截退款量 已退款自动拦截量 人工拦截量 物流异常总量 发货异常总量 打款总量 知识创建总量 知识使用总量 智动启动量
         </div>
         <el-input
           v-model="customerForm.dailyDataText"
           type="textarea"
           :rows="6"
-          placeholder="示例：&#10;2024-01-01 10 5 2 3 2 5&#10;2024-01-02 8 4 1 2 1 3"
+          placeholder="示例：&#10;2024-01-01 10 5 3 2 5 2 3 3 1 1 2 1 1 1 1 3 2 5"
         />
       </el-form>
       <template #footer>
@@ -360,8 +360,8 @@
           <div style="margin-bottom: 15px; color: #606266; font-size: 14px;">
             <p>每行一条数据，字段用空格或逗号分隔：</p>
             <p style="color: #909399; font-size: 12px; margin-top: 5px;">
-              格式1（只填工单量）：企业名 工单量<br>
-              格式2：企业名 日期 工单量 退换操作量 物流拦截量 打款数 知识创建量 知识使用量<br>
+              格式1（只填工单总量）：企业名 工单总量<br>
+              格式2：企业名 日期 工单总量 人工工单量 系统工单量 消费者工单量 退款操作总量 人工退款操作量 系统退款操作量 订单备注总量 人工备注量 系统备注量 物流拦截总量 自动拦截退款量 已退款自动拦截量 人工拦截量 物流异常总量 发货异常总量 打款总量 知识创建总量 知识使用总量 智动启动量<br>
               （日期可省略，默认为前一天，即 T+1 逻辑）
             </p>
           </div>
@@ -369,7 +369,7 @@
             v-model="batchDailyText"
             type="textarea"
             :rows="8"
-            placeholder="示例（带日期）：&#10;企业A 2024-01-01 10 5 2 3 2 5&#10;企业B 2024-01-01 8 4 1 2 1 3&#10;&#10;示例（省略日期，默认为前一天）：&#10;企业A 10 5 2 3 2 5&#10;企业B 8 4 1 2 1 3"
+            placeholder="示例（带日期）：&#10;企业A 2024-01-01 10 5 3 2 5 2 3 3 1 1 2 1 1 1 1 3 2 5&#10;企业B 2024-01-01 8 4 2 1 4 1 2 2 1 1 1 1 1 1 1 2 1 4&#10;&#10;示例（省略日期，默认为前一天）：&#10;企业A 10 5 3 2 5 2 3 3 1 1 2 1 1 1 1 3 2 5&#10;企业B 8 4 2 1 4 1 2 2 1 1 1 1 1 1 1 2 1 4"
           />
         </el-tab-pane>
       </el-tabs>
@@ -510,7 +510,7 @@ const checkHasOrder = (dailyData) => {
   
   return dailyData.some(day => {
     const items = day.items || {}
-    return (items['工单量'] || 0) > 0
+    return (items['工单总量'] || 0) > 0
   })
 }
 
@@ -627,7 +627,7 @@ const openEditDialog = (customer) => {
   const dailyDataText = sortedDailyData.length > 0
     ? sortedDailyData.map(d => {
         const items = d.items || {}
-        return `${d.date} ${items['工单量'] || 0} ${items['退换操作量'] || 0} ${items['物流拦截量'] || 0} ${items['打款数'] || 0} ${items['知识创建量'] || 0} ${items['知识使用量'] || 0}`
+        return `${d.date} ${items['工单总量'] || 0} ${items['人工工单量'] || 0} ${items['系统工单量'] || 0} ${items['消费者工单量'] || 0} ${items['退款操作总量'] || 0} ${items['人工退款操作量'] || 0} ${items['系统退款操作量'] || 0} ${items['订单备注总量'] || 0} ${items['人工备注量'] || 0} ${items['系统备注量'] || 0} ${items['物流拦截总量'] || 0} ${items['自动拦截退款量'] || 0} ${items['已退款自动拦截量'] || 0} ${items['人工拦截量'] || 0} ${items['物流异常总量'] || 0} ${items['发货异常总量'] || 0} ${items['打款总量'] || 0} ${items['知识创建总量'] || 0} ${items['知识使用总量'] || 0} ${items['智动启动量'] || 0}`
       }).join('\n')
     : ''
   customerForm.value = {
@@ -821,12 +821,26 @@ const saveBatchDaily = async () => {
       const dailyItem = {
         date: date,
         items: {
-          '工单量': parseInt(parts[dataStartIndex]) || 0,
-          '退换操作量': parseInt(parts[dataStartIndex + 1]) || 0,
-          '物流拦截量': parseInt(parts[dataStartIndex + 2]) || 0,
-          '打款数': parseInt(parts[dataStartIndex + 3]) || 0,
-          '知识创建量': parseInt(parts[dataStartIndex + 4]) || 0,
-          '知识使用量': parseInt(parts[dataStartIndex + 5]) || 0
+          '工单总量': parseInt(parts[dataStartIndex]) || 0,
+          '人工工单量': parseInt(parts[dataStartIndex + 1]) || 0,
+          '系统工单量': parseInt(parts[dataStartIndex + 2]) || 0,
+          '消费者工单量': parseInt(parts[dataStartIndex + 3]) || 0,
+          '退款操作总量': parseInt(parts[dataStartIndex + 4]) || 0,
+          '人工退款操作量': parseInt(parts[dataStartIndex + 5]) || 0,
+          '系统退款操作量': parseInt(parts[dataStartIndex + 6]) || 0,
+          '订单备注总量': parseInt(parts[dataStartIndex + 7]) || 0,
+          '人工备注量': parseInt(parts[dataStartIndex + 8]) || 0,
+          '系统备注量': parseInt(parts[dataStartIndex + 9]) || 0,
+          '物流拦截总量': parseInt(parts[dataStartIndex + 10]) || 0,
+          '自动拦截退款量': parseInt(parts[dataStartIndex + 11]) || 0,
+          '已退款自动拦截量': parseInt(parts[dataStartIndex + 12]) || 0,
+          '人工拦截量': parseInt(parts[dataStartIndex + 13]) || 0,
+          '物流异常总量': parseInt(parts[dataStartIndex + 14]) || 0,
+          '发货异常总量': parseInt(parts[dataStartIndex + 15]) || 0,
+          '打款总量': parseInt(parts[dataStartIndex + 16]) || 0,
+          '知识创建总量': parseInt(parts[dataStartIndex + 17]) || 0,
+          '知识使用总量': parseInt(parts[dataStartIndex + 18]) || 0,
+          '智动启动量': parseInt(parts[dataStartIndex + 19]) || 0
         }
       }
 
@@ -846,7 +860,7 @@ const saveBatchDaily = async () => {
         .update({
           daily_data: existingDailyData,
           health_status: calculatedStatus,
-          has_order: existingDailyData.some(d => (d.items['工单量'] || 0) > 0)
+          has_order: existingDailyData.some(d => (d.items['工单总量'] || 0) > 0)
         })
         .eq('id', customer.id)
       
@@ -901,12 +915,26 @@ const addDailyData = () => {
   customerForm.value.dailyData.push({
     date: '',
     items: {
-      '工单量': 0,
-      '退换操作量': 0,
-      '物流拦截量': 0,
-      '打款数': 0,
-      '知识创建量': 0,
-      '知识使用量': 0
+      '工单总量': 0,
+      '人工工单量': 0,
+      '系统工单量': 0,
+      '消费者工单量': 0,
+      '退款操作总量': 0,
+      '人工退款操作量': 0,
+      '系统退款操作量': 0,
+      '订单备注总量': 0,
+      '人工备注量': 0,
+      '系统备注量': 0,
+      '物流拦截总量': 0,
+      '自动拦截退款量': 0,
+      '已退款自动拦截量': 0,
+      '人工拦截量': 0,
+      '物流异常总量': 0,
+      '发货异常总量': 0,
+      '打款总量': 0,
+      '知识创建总量': 0,
+      '知识使用总量': 0,
+      '智动启动量': 0
     }
   })
 }
@@ -928,12 +956,26 @@ const parseDailyDataText = (text) => {
     result.push({
       date: formatDate(parts[0]) || '',
       items: {
-        '工单量': parseInt(parts[1]) || 0,
-        '退换操作量': parseInt(parts[2]) || 0,
-        '物流拦截量': parseInt(parts[3]) || 0,
-        '打款数': parseInt(parts[4]) || 0,
-        '知识创建量': parseInt(parts[5]) || 0,
-        '知识使用量': parseInt(parts[6]) || 0
+        '工单总量': parseInt(parts[1]) || 0,
+        '人工工单量': parseInt(parts[2]) || 0,
+        '系统工单量': parseInt(parts[3]) || 0,
+        '消费者工单量': parseInt(parts[4]) || 0,
+        '退款操作总量': parseInt(parts[5]) || 0,
+        '人工退款操作量': parseInt(parts[6]) || 0,
+        '系统退款操作量': parseInt(parts[7]) || 0,
+        '订单备注总量': parseInt(parts[8]) || 0,
+        '人工备注量': parseInt(parts[9]) || 0,
+        '系统备注量': parseInt(parts[10]) || 0,
+        '物流拦截总量': parseInt(parts[11]) || 0,
+        '自动拦截退款量': parseInt(parts[12]) || 0,
+        '已退款自动拦截量': parseInt(parts[13]) || 0,
+        '人工拦截量': parseInt(parts[14]) || 0,
+        '物流异常总量': parseInt(parts[15]) || 0,
+        '发货异常总量': parseInt(parts[16]) || 0,
+        '打款总量': parseInt(parts[17]) || 0,
+        '知识创建总量': parseInt(parts[18]) || 0,
+        '知识使用总量': parseInt(parts[19]) || 0,
+        '智动启动量': parseInt(parts[20]) || 0
       }
     })
   }
